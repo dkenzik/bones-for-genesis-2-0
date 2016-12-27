@@ -1,13 +1,15 @@
 .btn {
 	display: inline-block;
+	padding: 0;
 	width: auto;
 	border: none;
 	border-radius: 0;
+	background-color: transparent;
 	text-align: center;
 	white-space: nowrap;
 	line-height: 1;
 	cursor: pointer;
-	transition: all .1s ease-in-out;
+	transition: all .15s ease-in-out;
 	-webkit-appearance: none;
 	-moz-appearance: none;
 

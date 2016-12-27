@@ -22,9 +22,36 @@ module.exports = function(grunt) {
 			}
 		},
 
+		postcss: {
+			scss: {
+				options: {
+					syntax: require('postcss-scss'),
+					processors: [
+						require('postcss-flexbugs-fixes')
+					]
+				},
+				src: 'sass/**/*.scss'
+			},
+			css: {
+				options: {
+					processors: [
+						require('postcss-import'),
+						require('postcss-color-rgba-fallback'),
+						require('postcss-easings'),
+						require('postcss-focus'),
+						require('postcss-assets'),
+						require('autoprefixer')({
+							cascade: true,
+							flexbox: false
+						}),
+					]
+				},
+				src: 'build/**/*.css'
+			}
+		},
+
 		sass: {
 			options: {
-				compass: true,
 				style: 'expanded',
 				precision: 3,
 				sourcemap: 'none'
@@ -37,34 +64,9 @@ module.exports = function(grunt) {
 			}
 		},
 
-		csslint: {
-			build: {
-				options: {
-					csslintrc: 'sass/.csslintrc'
-				},
-				src: [
-					'build/css/style.css',
-					'build/css/admin.css'
-				]
-			}
-		},
-
-		grunticon: {
-			options: {
-				compressPNG: true
-			},
-			build: {
-				files: [{
-					expand: true,
-					cwd: 'svgs/',
-					src: ['*.svg', '*.png'],
-					dest: 'build/svgs/'
-				}]
-			}
-		},
-
 		jshint: {
 			options: {
+				strict: true,
 				globals: {
 					jQuery: true
 				}
@@ -80,13 +82,8 @@ module.exports = function(grunt) {
 			build: {
 				src: [
 					'bower_components/include-media-export/include-media.js',
-					'bower_components/iOS-Orientationchange-Fix/ios-orientationchange-fix.js',
-					'bower_components/jquery-placeholder/jquery.placeholder.js',
-					'bower_components/jquery.fitvids/jquery.fitvids.js',
 					'bower_components/js-cookie/src/js.cookie.js',
-					'bower_components/superfish/dist/js/superfish.js',
-					'bower_components/svgeezy/svgeezy.js',
-					'build/svgs/grunticon.loader.js',
+					'bower_components/vanilla-fitvids/dist/fitvids.js',
 					'js/scripts.js'
 				],
 				dest: 'build/js/scripts.js',
@@ -103,24 +100,13 @@ module.exports = function(grunt) {
 
 		uglify: {
 			options: {
-				preserveComments: 'some'
+				preserveComments: 'some',
+				sourceMap: true
 			},
 			build: {
 				files: {
 					'build/js/scripts.min.js': 'build/js/scripts.js',
 					'build/js/admin.min.js': 'build/js/admin.js'
-				}
-			}
-		},
-
-		autoprefixer: {
-			options: {
-				cascade: true
-			},
-			build: {
-				files: {
-					'build/css/style.css': ['build/css/style.css'],
-					'build/css/admin.css': ['build/css/admin.css']
 				}
 			}
 		},
@@ -162,7 +148,7 @@ module.exports = function(grunt) {
 
 			css: {
 				files: ['sass/**/*.scss'],
-				tasks: ['sass', 'autoprefixer'],
+				tasks: ['sass', 'postcss:css'],
 				options: {
 					spawn: false
 				}
@@ -170,15 +156,7 @@ module.exports = function(grunt) {
 
 			images: {
 				files: ['images/**/*'],
-				tasks: ['newer:imagemin'],
-				options: {
-					spawn: false
-				}
-			},
-
-			svgs: {
-				files: ['svgs/**/*'],
-				tasks: ['newer:grunticon'],
+				tasks: ['newer:imagemin', 'sass', 'postcss:css'],
 				options: {
 					spawn: false
 				}
@@ -187,22 +165,20 @@ module.exports = function(grunt) {
 
 	});
 
-	grunt.loadNpmTasks('grunt-autoprefixer');
 	grunt.loadNpmTasks('grunt-contrib-clean');
 	grunt.loadNpmTasks('grunt-contrib-concat');
-	grunt.loadNpmTasks('grunt-contrib-csslint');
 	grunt.loadNpmTasks('grunt-contrib-imagemin');
 	grunt.loadNpmTasks('grunt-contrib-jshint');
-	grunt.loadNpmTasks('grunt-contrib-sass');
+	grunt.loadNpmTasks('grunt-sass');
 	grunt.loadNpmTasks('grunt-contrib-uglify');
 	grunt.loadNpmTasks('grunt-contrib-watch');
 	grunt.loadNpmTasks('grunt-csscomb');
 	grunt.loadNpmTasks('grunt-csso');
-	grunt.loadNpmTasks('grunt-grunticon');
 	grunt.loadNpmTasks('grunt-newer');
 	grunt.loadNpmTasks('grunt-notify');
+	grunt.loadNpmTasks('grunt-postcss');
 
-	grunt.registerTask('default', ['clean', 'sass', 'grunticon', 'concat', 'imagemin', 'autoprefixer', 'watch']);
-	grunt.registerTask('build', ['clean', 'csscomb', 'sass', 'grunticon', 'jshint', 'concat', 'uglify', 'imagemin', 'autoprefixer', 'csso']);
+	grunt.registerTask('default', ['clean', 'imagemin', 'sass', 'concat', 'postcss:css', 'watch']);
+	grunt.registerTask('build', ['clean', 'imagemin', 'csscomb', 'postcss:scss', 'sass', 'jshint', 'concat', 'uglify', 'postcss:css', 'csso']);
 
 };

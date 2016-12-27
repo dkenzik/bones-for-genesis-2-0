@@ -1,20 +1,26 @@
 {
   "name": "genesis-bfg",
   "devDependencies": {
+    "autoprefixer": "*",
     "grunt": "*",
-    "grunt-autoprefixer": "*",
     "grunt-contrib-clean": "*",
     "grunt-contrib-concat": "*",
-    "grunt-contrib-csslint": "*",
     "grunt-contrib-imagemin": "*",
     "grunt-contrib-jshint": "*",
-    "grunt-contrib-sass": "*",
     "grunt-contrib-uglify": "*",
     "grunt-contrib-watch": "*",
     "grunt-csscomb": "*",
     "grunt-csso": "*",
-    "grunt-grunticon": "*",
     "grunt-newer": "*",
-    "grunt-notify": "*"
+    "grunt-notify": "*",
+    "grunt-postcss": "*",
+    "grunt-sass": "*",
+    "postcss-assets": "*",
+    "postcss-color-rgba-fallback": "*",
+    "postcss-easings": "*",
+    "postcss-flexbugs-fixes": "*",
+    "postcss-focus": "*",
+    "postcss-import": "*",
+    "postcss-scss": "*"
   }
 }

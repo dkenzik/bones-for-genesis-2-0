@@ -1,7 +1,7 @@
 Bones for Genesis 2.0
 ==============
 
-My fork of [eddiemachado's](https://github.com/eddiemachado/bones-genesis) Bones for Genesis. Built for Genesis 2.2.7+ and WordPress 4.4+.
+My fork of [eddiemachado's](https://github.com/eddiemachado/bones-genesis) Bones for Genesis. Built for Genesis 2.3+ and WordPress 4.7+.
 
 A starting point for new Genesis projects. This is a starter child theme, not a dependency. Clone it. Fork it. Hack it for your own projects. Build cool things on the web.
 
@@ -127,6 +127,120 @@ grunt
 - Disable some or all of the default Genesis theme option meta boxes (template, some disabled by default)
 
 ## Changelog
+### 2.3.49 (December 15, 2016)
+- Remove `grunt-contrib-copy`
+- Remove `console` fallback from `scripts.js`
+- Always use `wp_safe_redirect()`
+- Add `bfg_script_loader_tags()` to enable `defer` attribute on `<script>` tags (disabled by default)
+
+### 2.3.48 (December 8, 2016)
+- Update `PHP-CS-Fixer`
+- Update default WP login logo size
+- Don't apply `bfg_content_security_policy()` on header
+
+### 2.3.47 (November 17, 2016)
+- Remove `bfg_jquery_local_fallback()` (again)
+- Run `postcss:css` in `grunt`
+
+### 2.3.46 (November 10, 2016)
+- Add AJAX URL as a `data-*` attribute on `<body>`, instead of an inline script, for better CSP compatibility (disabled by default)
+- More consistent `.btn` default styles
+
+### 2.3.45 (November 2, 2016)
+- PostCSS image inlining
+
+### 2.3.44 (October 22, 2016)
+- Restore jQuery fallback, but disabled by default
+
+### 2.3.43 (October 22, 2016)
+- Add a `Content-Security-Policy` header (disabled by default)
+- Move inline admin bar styles to `_type.scss` and `_print.scss`
+- Remove avatar in admin bar
+- Remove jQuery fallback
+
+### 2.3.42 (October 15, 2016)
+- Remove `svgs` folder
+- Update `%visuallyhidden` CSS
+
+### 2.3.41 (September 25, 2016)
+- Minor PHP spacing/style changes
+- Remove `bfg_ie_font_face_fix()`
+
+### 2.3.40 (September 7, 2016)
+- Add PostCSS modules: `postcss-flexbugs-fixes`, `postcss-import`, `postcss-easings`
+- Remove Grunt modules: `csslint`, `grunticon`, `stylelint`
+- Switch to PostCSS's `autoprefixer`, since `grunt-autoprefixer` is deprecated
+- Turn off `flexbox` for `autoprefixer` by default
+- Use `normalize.css` instead of `normalize.scss`
+
+### 2.3.39 (August 20, 2016)
+- Add SCSS to hide the WP admin bar on mobile (disabled by default)
+- Allow `favicon.ico` to be loaded from the `images` folder
+
+### 2.3.38 (August 7, 2016)
+- Remove `jquery.fitvids` from `bower.json`
+- Use `grunt-sass` instead of `grunt-contrib-sass` (faster than Ruby)
+- Add `bfg_enable_svg_uploads()` (disabled by default)
+- Add filter for `genesis_pre_get_option_site_layout()` to `layout.php` (disabled by default)
+- Add `search.php` to override Genesis's
+
+### 2.3.37 (July 26, 2016)
+- Use [brand-colors](https://github.com/reimertz/brand-colors)
+- Use [postcss-color-rgba-fallback](https://github.com/postcss/postcss-color-rgba-fallback)
+- Use WP 4.6's `wp_resource_hints` filter
+- Remove code deregistering WP's Open Sans font
+- Use WP 4.6's font stack in `_variables.scss`
+
+### 2.3.36 (July 23, 2016)
+- Remove scripts not needed on modern browsers
+- Replace `FitVids.js` with `vanilla-fitvids`
+
+### 2.3.35 (July 7, 2016)
+- `pre_get_posts` is an action, not a filter
+- Higher specificity on `bfg_replace_login_logo()`
+- Remove `wp_shortlink_wp_head()`
+- Add `bfg_add_tinymce_plugins()` (disabled by default)
+
+### 2.3.34 (June 28, 2016)
+- Upgrade `jQuery` version to 3.0.0
+- Add `jQuery` to bower and use this version for non-CDN fallback, instead of WP's version
+- Remove IE-specific code
+- Add `.gallery` scaffold SCSS
+- Add wrapper default padding
+- Use full `flex` syntax
+
+### 2.3.33 (June 15, 2016)
+- Use [Stylelint](https://github.com/stylelint/stylelint) for better SCSS consistency
+- Force strict JS
+- Added `bfg_load_child_theme_textdomain()` (disabled by default)
+- Updated jQuery version
+- Various style tweaks
+
+### 2.3.32 (May 17, 2016)
+- Add `genesis_404_entry_title` filter to `404.php`
+- Use `normalize.scss` instead of `sanitize.css`
+- `"use strict"` on JS files
+- Remove hyphens on paragraph text
+
+### 2.3.31 (May 2, 2016)
+- Remove superfish
+- Remove `:focus` override
+- Tweak default styles
+- Tweak `@media print` styles
+- Fix bugs related to `include-media-export` usage
+- Add `bfg_limit_menu_depth` to limit the number of submenus for the default menus
+- Enable more HTML5 and accessibility features
+
+### 2.3.30 (April 26, 2016)
+- Add archive SCSS template
+- Enable JS source maps
+- Add `bfg_remove_meta_boxes` - partially disabled by default 
+- Remove the Genesis user meta boxes - disabled by default
+
+### 2.3.29 (April 3, 2016)
+- Remove `genesis_upgrade_redirect`
+- Use `sanitize.css` instead of `normalize.scss`
+
 ### 2.3.28 (March 10, 2016)
 - Remove `bfg_highlight_non_breaking_spaces`
 - Unhook `genesis_load_favicon` by default

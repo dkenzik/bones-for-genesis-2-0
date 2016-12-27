@@ -1,16 +1,16 @@
-// Compass & Variables
-@import 'compass/css3';
+// CSS Imports (relative to build/css)
+@import '../../bower_components/normalize-css/normalize.css';
 
 // Colors
+@import '../bower_components/brand-colors/dist/latest/scss/brand-colors.latest.scss';
 @import '../bower_components/colors-sass/sass/variables';
 
-// Variables & Mixins
+// Variables & Mixins - variables must be imported after include-media, so that breakpoints aren't overwritten
 @import '../bower_components/include-media/dist/_include-media';
-@import '../bower_components/include-media-export/dist/_include-media-export';
 @import 'variables';
+@import '../bower_components/include-media-export/dist/_include-media-export';
 
-// Normalize, Clearfix, & Toolkit
-@import '../bower_components/normalize-scss/normalize.scss';
+// Clearfix & Toolkit
 @import 'clearfix';
 @import 'toolkit';
 @import 'accessibility';
@@ -21,8 +21,8 @@ html {
 }
 
 *,
-*:before,
-*:after {
+*::before,
+*::after {
 	box-sizing: inherit;
 }
 
@@ -44,12 +44,10 @@ html {
 @import 'footer';
 
 // Templates
+@import 'archives';
 
 // Print
 @import 'print';
-
-// IE Compatibility
-@import 'ie';
 
 // Shame - For new style snippets that haven't been sorted and commented yet
 @import 'shame';

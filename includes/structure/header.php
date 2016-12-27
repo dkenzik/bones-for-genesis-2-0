@@ -15,11 +15,50 @@ remove_action( 'wp_head', 'wp_generator' );								// WP Version
 remove_action( 'wp_head', 'wlwmanifest_link');							// WLW Manifest
 // remove_action( 'wp_head', 'feed_links', 2 ); 						// Remove feed links
 remove_action( 'wp_head', 'feed_links_extra', 3 ); 						// Remove comment feed links
+remove_action( 'wp_head', 'wp_shortlink_wp_head', 10, 0 );				// Remove shortlink
 
 // Remove WP-API <head> material
 // See: https://wordpress.stackexchange.com/questions/211467/remove-json-api-links-in-header-html
 remove_action( 'wp_head', 'rest_output_link_wp_head' );
 remove_action( 'template_redirect', 'rest_output_link_header', 11, 0 );
+
+/*
+ * Set a Content-Security-Policy header to help prevent XSS attacks
+ *
+ * See: https://www.smashingmagazine.com/2016/09/content-security-policy-your-future-best-friend/http://html5boilerplate.com/
+ * See: http://githubengineering.com/githubs-csp-journey/
+ *
+ * @since 2.3.43
+ */
+// add_action(  'wp', 'bfg_content_security_policy' );
+function bfg_content_security_policy() {
+
+	if( is_admin() )
+		return;
+
+	$use_production_assets = genesis_get_option('bfg_production_on');
+	$use_production_assets = !empty($use_production_assets);
+
+	ob_start();
+	?>
+	default-src 'none';
+	base-uri 'self';
+	block-all-mixed-content;
+	font-src 'self' fonts.gstatic.com;
+	form-action 'self';
+	frame-ancestors 'none';
+	img-src 'self';
+	script-src 'self' ajax.googleapis.com;
+	style-src 'self';
+	<?php
+	$csp = ob_get_clean();
+
+	$csp = str_replace( "\n", ' ', $csp );
+	$csp = $use_production_assets ? 'Content-Security-Policy: ' . $csp : 'Content-Security-Policy-Report-Only: ' . $csp;
+
+	header( $csp );
+
+}
 
 remove_action( 'genesis_doctype', 'genesis_do_doctype' );
 add_action( 'genesis_doctype', 'bfg_do_doctype' );
@@ -32,22 +71,17 @@ add_action( 'genesis_doctype', 'bfg_do_doctype' );
  */
 function bfg_do_doctype() {
 
-	if( genesis_html5() ) {
 ?>
 <!DOCTYPE html>
-<!--[if IE 8]> <html class="no-js lt-ie9" <?php language_attributes( 'html' ); ?>> <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" <?php language_attributes( 'html' ); ?>> <!--<![endif]-->
+<html class="no-js <?php echo is_admin_bar_showing() ? 'admin-bar-showing' : ''; ?>" <?php language_attributes( 'html' ); ?>>
 <head>
 <meta charset="<?php bloginfo( 'charset' ); ?>">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <?php
-	} else {
-		genesis_xhtml_doctype();
-	}
 
 }
 
-add_action( 'wp_head', 'bfg_fetch_dns', 1 );
+add_filter( 'wp_resource_hints', 'bfg_resource_hints', 10, 2 );
 /**
  * Prefetch the DNS for external resource domains. Better browser support than preconnect.
  *
@@ -55,15 +89,14 @@ add_action( 'wp_head', 'bfg_fetch_dns', 1 );
  *
  * @since 2.3.19
  */
-function bfg_fetch_dns() {
+function bfg_resource_hints( $hints, $relation_type ) {
 
-	$hrefs = array(
-		'//ajax.googleapis.com',
-		// '//fonts.googleapis.com'
-	);
+	if( 'dns-prefetch' === $relation_type ) {
+		$hints[] = '//ajax.googleapis.com';
+		// $hints[] = '//fonts.googleapis.com';
+	}
 
-	foreach( $hrefs as $href )
-		echo '<link rel="dns-prefetch" href="' . $href . '">' . "\n";
+	return $hints;
 
 }
 
@@ -91,11 +124,6 @@ function bfg_load_assets() {
 	$src = $use_production_assets ? '/build/css/style.min.css' : '/build/css/style.css';
 	wp_enqueue_style( 'bfg', $stylesheet_dir . $src, array(), $assets_version );
 
-	// Disable the 'Open Sans' loaded by the admin bar
-	// https://wordpress.org/support/topic/remove-open-sans-and-add-custom-fonts
-	wp_deregister_style( 'open-sans' );
-	wp_register_style( 'open-sans', false );
-
 	// Google Fonts
 	// Consider async loading: https://github.com/typekit/webfontloader
  	// wp_enqueue_style(
@@ -114,73 +142,46 @@ function bfg_load_assets() {
 
 	// Override WP default self-hosted jQuery with version from Google's CDN
 	wp_deregister_script( 'jquery' );
-	$src = $use_production_assets ? '//ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js' : '//ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.js';
+	$src = $use_production_assets ? '//ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js' : '//ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.js';
 	wp_register_script( 'jquery', $src, array(), null, true );
-	add_filter( 'script_loader_src', 'bfg_jquery_local_fallback', 10, 2 );
 
 	// Main script file (in footer)
 	$src = $use_production_assets ? '/build/js/scripts.min.js' : '/build/js/scripts.js';
 	wp_enqueue_script( 'bfg', $stylesheet_dir . $src, array('jquery'), $assets_version, true );
-	wp_localize_script(
-		'bfg',
-		'grunticon_paths',
-		array(
-			'svg'      => $stylesheet_dir . '/build/svgs/icons.data.svg.css',
-			'png'      => $stylesheet_dir . '/build/svgs/icons.data.png.css',
-			'fallback' => $stylesheet_dir . '/build/svgs/icons.fallback.css',
-		)
-	);
-	// wp_localize_script( 'bfg', 'ajax_object', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
 
 }
 
-add_filter( 'script_loader_tag', 'bfg_ie_script_conditionals', 10, 3 );
+// add_filter('script_loader_tag', 'bfg_script_loader_tags', 10, 2);
 /**
- * Conditionally load jQuery v1 on old IE.
+ * Add a defer attribute to the designated <script> tags.
  *
- * @since 2.3.1
+ * See: http://calendar.perfplanet.com/2016/prefer-defer-over-async/
+ *
+ * @since 2.3.49
  */
-function bfg_ie_script_conditionals( $tag, $handle, $src ) {
+function bfg_script_loader_tags( $tag, $handle ) {
 
-	if( 'jquery' === $handle ) {
-		$output = '<!--[if !IE]> -->' . "\n" . $tag . '<!-- <![endif]-->' . "\n";
-		$output .= '<!--[if gt IE 8]>' . "\n" . $tag . '<![endif]-->' . "\n";
-
-		$use_production_assets = genesis_get_option('bfg_production_on');
-		$use_production_assets = !empty($use_production_assets);
-		$src                   = $use_production_assets ? '//ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js' : '//ajax.googleapis.com/ajax/libs/jquery/1/jquery.js';
-		$fallback_script       = '<script type="text/javascript" src="' . $src . '"></script>';
-		$output .= '<!--[if lte IE 8]>' . "\n" . $fallback_script . '<![endif]-->' . "\n";
-	} else {
-		$output = $tag;
+	switch( $handle ) {
+		case 'jquery':
+		case 'bfg':
+			return str_replace( ' src', ' defer src', $tag );
 	}
 
-	return $output;
+	return $tag;
 
 }
 
-/*
- * jQuery local fallback, if Google CDN is unreachable
+add_filter( 'genesis_attr_body', 'bfg_ajax_url_attribute' );
+/**
+ * Add the AJAX URL as a `data-*` attribute on `<body>`, instead of an inline script, for better CSP compatibility.
  *
- * See: https://github.com/roots/roots/blob/aa59cede7fbe2b853af9cf04e52865902d2ff1a9/lib/scripts.php#L37-L52
- *
- * @since 2.0.20
+ * @since 2.3.46
  */
-add_action( 'wp_head', 'bfg_jquery_local_fallback' );
-function bfg_jquery_local_fallback( $src, $handle = null ) {
+function bfg_ajax_url_attribute( $atts ) {
 
-	static $add_jquery_fallback = false;
+	$atts['data-ajax_url'] = admin_url( 'admin-ajax.php' );
 
-	if( $add_jquery_fallback ) {
-		echo '<script>window.jQuery || document.write(\'<script src="' . includes_url() . 'js/jquery/jquery.js"><\/script>\')</script>' . "\n";
-		$add_jquery_fallback = false;
-	}
-
-	if( $handle === 'jquery' ) {
-		$add_jquery_fallback = true;
-	}
-
-	return $src;
+	return $atts;
 
 }
 
@@ -253,4 +254,3 @@ function bfg_load_favicons() {
  */
 // remove_action( 'genesis_site_title', 'genesis_seo_site_title' );
 // remove_action( 'genesis_site_description', 'genesis_seo_site_description' );
-

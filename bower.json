@@ -8,15 +8,12 @@
     "tests"
   ],
   "dependencies": {
+    "brand-colors": "reimertz/brand-colors",
     "colors-sass": "mrmrs/colors-sass",
     "include-media-export": "*",
     "include-media": "*",
-    "iOS-Orientationchange-Fix": "scottjehl/iOS-Orientationchange-Fix",
-    "jquery-placeholder": "*",
-    "jquery.fitvids": "davatron5000/FitVids.js",
     "js-cookie": "js-cookie/js-cookie",
-    "normalize-scss": "*",
-    "superfish": "*",
-    "svgeezy": "*"
+    "normalize-css": "necolas/normalize.css",
+    "vanilla-fitvids": "rosszurowski/vanilla-fitvids"
   }
 }

@@ -3,6 +3,42 @@
 if( !defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 /*
+ * Remove admin bar inline CSS
+ *
+ * @since 2.3.43
+ */
+add_theme_support( 'admin-bar', array('callback' => '__return_false') );
+
+add_action(  'admin_bar_init', 'bfg_remove_admin_bar_inline_css' );
+function bfg_remove_admin_bar_inline_css() {
+
+	remove_action( 'wp_head', 'wp_admin_bar_header' );
+
+}
+
+/*
+ * Remove admin bar avatar
+ *
+ * See: https://gist.github.com/ocean90/1723233
+ *
+ * @since 2.3.43
+ */
+
+add_action( 'admin_bar_menu', 'bfg_hide_admin_bar_avatar', 0 );
+function bfg_hide_admin_bar_avatar() {
+
+	add_filter( 'pre_option_show_avatars', '__return_zero' );
+
+}
+
+add_action( 'admin_bar_menu', 'bfg_restore_avatars', 10 );
+function bfg_restore_avatars() {
+
+	remove_filter( 'pre_option_show_avatars', '__return_zero' );
+
+}
+
+/*
  * Only show the admin bar to users who can at least use Posts
  *
  * @since 2.0.0
@@ -141,6 +177,34 @@ function bfg_add_editor_style() {
 
 }
 
+// add_filter( 'mce_external_plugins', 'bfg_add_tinymce_plugins' );
+/*
+ * Add a plugin script for TinyMCE
+ *
+ * @since 2.3.35
+ */
+function bfg_add_tinymce_plugins( $plugin_array ) {
+
+	$use_production_assets = genesis_get_option('bfg_production_on');
+	$use_production_assets = !empty($use_production_assets);
+
+	$assets_version = genesis_get_option('bfg_assets_version');
+	$assets_version = !empty($assets_version) ? absint($assets_version) : null;
+
+	$src = $use_production_assets ? '/build/js/tinymce.min.js' : '/build/js/tinymce.js';
+	$src = add_query_arg(
+		array(
+			'ver' => $assets_version,
+		),
+		$src
+	);
+
+	$plugin_array['bfg_admin'] = get_stylesheet_directory_uri() . $src;
+
+	return $plugin_array;
+
+}
+
 add_filter( 'tiny_mce_before_init', 'bfg_tiny_mce_before_init' );
 /**
  * Modifies the TinyMCE settings array.
@@ -183,12 +247,11 @@ add_filter( 'user_contactmethods', 'bfg_user_contactmethods' );
  */
 function bfg_user_contactmethods( $fields ) {
 
-	// $fields['facebook'] = 'Facebook';												// Add Facebook
+	// $fields['facebook'] = 'Facebook';											// Add Facebook
 	// $fields['twitter'] = 'Twitter';												// Add Twitter
-	// $fields['linkedin'] = 'LinkedIn';												// Add LinkedIn
-	unset( $fields['aim'] );														// Remove AIM
-	unset( $fields['yim'] );														// Remove Yahoo IM
-	unset( $fields['jabber'] );														// Remove Jabber / Google Talk
+	// $fields['linkedin'] = 'LinkedIn';											// Add LinkedIn
+	unset( $fields['aim'], $fields['yim'], $fields['jabber'] );						// Remove AIM, Yahoo IM, and Jabber / Google Talk
+
 	return $fields;
 
 }
@@ -258,8 +321,7 @@ function bfg_hide_admin_help_button() {
 // add_filter( 'theme_page_templates', 'bfg_deregister_page_templates' );
 function bfg_deregister_page_templates( $templates ) {
 
-	unset($templates['page_archive.php']);
-	unset($templates['page_blog.php']);
+	unset($templates['page_archive.php'], $templates['page_blog.php']);
 
 	return $templates;
 
@@ -284,5 +346,38 @@ function bfg_admin_menu_plugins_node( $wp_admin_bar ) {
 	);
 
 	$wp_admin_bar->add_node( $node );
+
+}
+
+add_action( 'do_meta_boxes', 'bfg_remove_meta_boxes' );
+/**
+ * Remove WP default meta boxes. You should always unhook 'Custom Fields', since it can be a large query.
+ *
+ * @since 2.3.30
+ */
+function bfg_remove_meta_boxes() {
+
+	// Post
+	// remove_meta_box( 'authordiv', 'post', 'normal' );
+	// remove_meta_box( 'categorydiv', 'post', 'side' );
+	// remove_meta_box( 'commentsdiv', 'post', 'normal' );
+	// remove_meta_box( 'commentstatusdiv', 'post', 'normal' );
+	remove_meta_box( 'postcustom', 'post', 'normal' );
+	// remove_meta_box( 'postexcerpt', 'post', 'normal' );
+	// remove_meta_box( 'postimagediv', 'post', 'side' );
+	// remove_meta_box( 'revisionsdiv', 'post', 'normal' );
+	// remove_meta_box( 'slugdiv', 'post', 'normal' );
+	// remove_meta_box( 'submitdiv', 'post', 'side' );
+	// remove_meta_box( 'tagsdiv-post_tag', 'post', 'side' );
+	// remove_meta_box( 'trackbacksdiv', 'post', 'normal' );
+
+	// Page
+	// remove_meta_box( 'authordiv', 'page', 'normal' );
+	// remove_meta_box( 'commentstatusdiv', 'page', 'normal' );
+	// remove_meta_box( 'pageparentdiv', 'page', 'side' );
+	remove_meta_box( 'postcustom', 'page', 'normal' );
+	// remove_meta_box( 'postimagediv', 'page', 'side' );
+	// remove_meta_box( 'slugdiv', 'page', 'normal' );
+	// remove_meta_box( 'submitdiv', 'page', 'side' );
 
 }
