@@ -35,17 +35,11 @@ textarea {
 
 select {
 	width: 100%;
+	color: $black;
 }
 
 ::placeholder {
 	text-overflow: ellipsis;
-}
-
-button,
-input[type='button'],
-input[type='reset'],
-input[type='submit'] {
-	@extend .btn;
 }
 
 input[type='search'] {

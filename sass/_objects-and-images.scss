@@ -50,7 +50,7 @@ img.centered,
 
 img.alignnone,
 .alignnone {
-	margin-bottom: $spacer / 1;
+	margin-bottom: $spacer;
 }
 
 a.alignleft,
@@ -72,7 +72,7 @@ img.alignright,
 }
 
 .wp-caption-text {
-	@extend %type;
+	@include type;
 	margin: 0;
 	text-align: center;
 }

@@ -27,8 +27,6 @@ html.admin-bar-showing {
 
 body {
 	font-family: $sans;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
 
 	font-variant-ligatures: common-ligatures;
 }
@@ -41,19 +39,18 @@ a {
 	text-decoration: underline;
 	transition: all .15s ease-in-out;
 
-	&:hover,
-	&:focus {
+	&:hover {
 		text-decoration: none;
 	}
 }
 
 ol,
 ul {
-	@extend %unstyled-list;
+	@include unstyled-list;
 }
 
 p {
-	margin: 0;
+	@include type;
 }
 
 b,

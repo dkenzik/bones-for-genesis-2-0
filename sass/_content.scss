@@ -8,20 +8,15 @@
 	a {
 		color: inherit;
 
-		&:hover,
-		&:focus {
+		&:hover {
 		}
 	}
 }
 
 .entry-content {
-	p {
-		@extend %type;
-	}
-
 	ol,
 	ul {
-		@extend %type;
+		@include type;
 		overflow: hidden;
 		padding-left: 2.5em;
 
@@ -52,7 +47,7 @@
 	}
 
 	table {
-		margin-bottom: 1.5em;
+		margin-bottom: $spacer;
 	}
 }
 
@@ -62,7 +57,7 @@
 }
 
 .entry-pagination {
-	@extend %type;
+	@include type;
 }
 
 .entry-meta {

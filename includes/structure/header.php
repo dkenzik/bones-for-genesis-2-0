@@ -36,27 +36,39 @@ function bfg_content_security_policy() {
 	if( is_admin() )
 		return;
 
-	$use_production_assets = genesis_get_option('bfg_production_on');
-	$use_production_assets = !empty($use_production_assets);
-
 	ob_start();
 	?>
 	default-src 'none';
 	base-uri 'self';
 	block-all-mixed-content;
+	connect-src 'self';
 	font-src 'self' fonts.gstatic.com;
 	form-action 'self';
 	frame-ancestors 'none';
 	img-src 'self';
-	script-src 'self' ajax.googleapis.com;
+	script-src 'self' cdn.jsdelivr.net cdn.polyfill.io;
 	style-src 'self' fonts.googleapis.com;
 	<?php
 	$csp = ob_get_clean();
 
 	$csp = str_replace( "\n", ' ', $csp );
-	$csp = $use_production_assets ? 'Content-Security-Policy: ' . $csp : 'Content-Security-Policy-Report-Only: ' . $csp;
 
-	header( $csp );
+	header( 'Content-Security-Policy: ' . $csp );
+
+}
+
+add_action( 'wp', 'bfg_send_frame_options_header' );
+/**
+ * Prevent other sites from embedding this one in an iFrame.
+ *
+ * @since 2.3.56
+ */
+function bfg_send_frame_options_header() {
+
+	if( is_admin() )
+		return;
+
+	send_frame_options_header();
 
 }
 
@@ -77,6 +89,7 @@ function bfg_do_doctype() {
 <head <?php echo genesis_attr( 'head' ); ?>>
 <meta charset="<?php bloginfo( 'charset' ); ?>">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="format-detection" content="telephone=no">
 <?php
 
 }
@@ -92,7 +105,8 @@ add_filter( 'wp_resource_hints', 'bfg_resource_hints', 10, 2 );
 function bfg_resource_hints( $hints, $relation_type ) {
 
 	if( 'dns-prefetch' === $relation_type ) {
-		$hints[] = '//ajax.googleapis.com';
+		// $hints[] = '//cdn.polyfill.io';
+		// $hints[] = '//cdn.jsdelivr.net';
 		// $hints[] = '//fonts.googleapis.com';
 	}
 
@@ -101,7 +115,6 @@ function bfg_resource_hints( $hints, $relation_type ) {
 }
 
 remove_action( 'genesis_meta', 'genesis_load_stylesheet' );
-remove_action( 'wp_enqueue_scripts', 'genesis_register_scripts' );
 add_action( 'wp_enqueue_scripts', 'bfg_load_assets' );
 /**
  * Overrides the default Genesis stylesheet with child theme specific CSS and JS.
@@ -133,17 +146,21 @@ function bfg_load_assets() {
  	// 	null
  	// );
 
- 	// Dequeue comment-reply if no active comments on page
-	if( ( is_single() || is_page() || is_attachment() ) && comments_open() & (int) get_option( 'thread_comments' ) === 1 && !is_front_page() ) {
-		wp_enqueue_script( 'comment-reply' );
-	} else {
-		wp_dequeue_script( 'comment-reply' );
-	}
+ 	// Register polyfill.io with default options
+	$src = $use_production_assets ? '//cdn.polyfill.io/v2/polyfill.min.js' : 'https://cdn.polyfill.io/v2/polyfill.js';
+	wp_register_script( 'polyfill', $src, array(), null, true );
 
-	// Override WP default self-hosted jQuery with version from Google's CDN
+	// Use jQuery from a CDN
+	// Using jQuery 2.* because Gravity Forms breaks with 3.*
 	wp_deregister_script( 'jquery' );
-	$src = $use_production_assets ? '//ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js' : '//ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.js';
+	$src = $use_production_assets ? '//cdn.jsdelivr.net/jquery/2.2.4/jquery.min.js' : '//cdn.jsdelivr.net/jquery/2.2.4/jquery.js';
 	wp_register_script( 'jquery', $src, array(), null, true );
+
+	// Dequeue Genesis's scripts
+	wp_dequeue_script( 'html5shiv' );
+	wp_dequeue_script( 'skip-links'  );
+	wp_dequeue_script( 'superfish' );
+	wp_dequeue_script( 'superfish-args'  );
 
 	// Main script file (in footer)
 	$src = $use_production_assets ? '/build/js/scripts.min.js' : '/build/js/scripts.js';
